@@ -33,8 +33,38 @@ class UserRegisterApi(Resource):
             user.set_password(data['password'])
             user.create()
             data = {
-                'Token': ''
+                'Token': user.encode_auth_token()
             }
             return responses.SuccessResponse(data).send()
         else:
             raise CustomException(detail='A user with this data exist.')
+
+
+@ns.route("/login")
+class UserLoginApi(Resource):
+
+    @ns.doc(model=LoginRegisterSchema)
+    @ns.expect(LoginRegisterParser)
+    def post(self):
+        """
+        Login user
+
+            username  min 5, max 50
+
+            password  min 5, max 50
+
+
+        :return:
+        """
+        data = LoginRegisterParser.parse_args()
+        user = User.query.filter_by(username=data['username']).first()
+        if user is None:
+            raise CustomException(detail='User does not exist.')
+        else:
+            if user.check_password(data['password']):
+                data = {
+                    'Token': user.encode_auth_token()
+                }
+                return responses.SuccessResponse(data).send()
+            else:
+                raise CustomException(detail='User does not exist.')

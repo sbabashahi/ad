@@ -1,9 +1,9 @@
 from setting.database import db
 
+from utils.model import BaseModel
 from utils.utils import now_time
 
-
-class Media(db.Model):
+class Media(BaseModel):
     __tablename__ = 'media'
     id = db.Column(db.Integer, primary_key=True)
     path = db.Column(db.String(200), nullable=False)
@@ -14,7 +14,7 @@ class Media(db.Model):
         return ''.join(['Media: ', self.title])
 
 
-class Ad(db.Model):
+class Ad(BaseModel):
     __tablename__ = 'ad'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), nullable=False)
