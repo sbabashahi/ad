@@ -3,6 +3,7 @@ from setting.database import db
 from utils.model import BaseModel
 from utils.utils import now_time
 
+
 class Media(BaseModel):
     __tablename__ = 'media'
     id = db.Column(db.Integer, primary_key=True)

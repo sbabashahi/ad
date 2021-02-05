@@ -5,7 +5,7 @@ from utils import parser_utils
 
 
 CategorySchema = api.model('Category', {
-    'id': fields.String(required=False, description='Category id.'),
+    'id': fields.Integer(required=False, description='Category id.'),
     'name': fields.String(required=True, description='Category name min 3, max 50.'),
 })
 

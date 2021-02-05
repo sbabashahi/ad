@@ -2,6 +2,7 @@ from flask import Flask, Blueprint
 
 from rest import api
 from setting.database import initialize_db
+from ad.views import ad as ad_name_space
 from category.views import ca as category_name_space
 from user.views import ns as user_name_space
 
@@ -13,6 +14,7 @@ blueprint = Blueprint('api', __name__, url_prefix='/')
 api.init_app(blueprint)
 api.add_namespace(user_name_space)
 api.add_namespace(category_name_space)
+api.add_namespace(ad_name_space)
 app.register_blueprint(blueprint)
 # get env variable
 app.config['BUNDLE_ERRORS'] = True
