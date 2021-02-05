@@ -1,6 +1,9 @@
-from setting.database import db
+from flask import g
 
+from category.models import Category
+from setting.database import db
 from utils.model import BaseModel
+from utils.exceptions import CustomException
 from utils.utils import now_time
 
 
@@ -31,3 +34,31 @@ class Ad(BaseModel):
 
     def __str__(self):
         return ''.join(['Ad: ', self.title])
+
+    def has_permission(self):
+        if self.user != g.user:
+            raise CustomException(detail='No permission.', code=403)
+
+    def delete(self):
+        self.is_deleted = True
+        self.save()
+
+    def update(self, data):
+        if data.get('category', None) and self.category.id != data['category']['id']:
+            category = Category.query.get(data['category']['id'])
+            if category:
+                self.category = category
+            else:
+                raise CustomException(detail='Category does not exist.')
+
+        if data.get('title', None) and self.title != data['title']:
+            self.title = data['title']
+
+        if data.get('body', None) and self.body != data['body']:
+            self.body = data['body']
+
+        if data.get('media'):
+            for media_data in data['media']:
+                if media_data.get('id', None) is None:
+                    self.media_set.append(Media(path=media_data['path']))
+        self.save()

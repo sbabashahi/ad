@@ -26,18 +26,21 @@ class UserRegisterApi(Resource):
 
         :return:
         """
-        data = LoginRegisterParser.parse_args()
-        user = User.query.filter_by(username=data['username']).first()
-        if user is None:
-            user = User(username=data['username'])
-            user.set_password(data['password'])
-            user.create()
-            data = {
-                'Token': user.encode_auth_token()
-            }
-            return responses.SuccessResponse(data).send()
-        else:
-            raise CustomException(detail='A user with this data exist.')
+        try:
+            data = LoginRegisterParser.parse_args()
+            user = User.query.filter_by(username=data['username']).first()
+            if user is None:
+                user = User(username=data['username'])
+                user.set_password(data['password'])
+                user.create()
+                data = {
+                    'Token': user.encode_auth_token()
+                }
+                return responses.SuccessResponse(data).send()
+            else:
+                raise CustomException(detail='A user with this data exist.')
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
 
 @ns.route("/login")
@@ -56,15 +59,18 @@ class UserLoginApi(Resource):
 
         :return:
         """
-        data = LoginRegisterParser.parse_args()
-        user = User.query.filter_by(username=data['username']).first()
-        if user is None:
-            raise CustomException(detail='User does not exist.')
-        else:
-            if user.check_password(data['password']):
-                data = {
-                    'Token': user.encode_auth_token()
-                }
-                return responses.SuccessResponse(data).send()
-            else:
+        try:
+            data = LoginRegisterParser.parse_args()
+            user = User.query.filter_by(username=data['username']).first()
+            if user is None:
                 raise CustomException(detail='User does not exist.')
+            else:
+                if user.check_password(data['password']):
+                    data = {
+                        'Token': user.encode_auth_token()
+                    }
+                    return responses.SuccessResponse(data).send()
+                else:
+                    raise CustomException(detail='User does not exist.')
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()

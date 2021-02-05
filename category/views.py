@@ -6,8 +6,9 @@ from rest import api
 from utils.middleware import auth_required
 from category.models import Category
 from category.schema import CategorySchema, CategoryParser
-from utils.utils import handle_pagination, marshal_list
 from utils import responses
+from utils.exceptions import CustomException
+from utils.utils import handle_pagination, marshal_list
 
 
 ca = api.namespace('category', description='Category Api')
@@ -25,12 +26,15 @@ class CategoryListApi(Resource):
 
         :return:
         """
-        arg = dict(request.args)
-        index, size = handle_pagination(arg)
-        categories = Category.query.all()
-        total = len(categories)
-        return responses.SuccessResponse(marshal_list(categories[index:size], CategorySchema),
-                                         index=index, total=total).send()
+        try:
+            arg = dict(request.args)
+            index, size = handle_pagination(arg)
+            categories = Category.query.all()
+            total = len(categories)
+            return responses.SuccessResponse(marshal_list(categories[index:size], CategorySchema),
+                                             index=index, total=total).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
 
 @ca.route("/")
@@ -48,6 +52,9 @@ class CategoryCreateApi(Resource):
 
         :return:
         """
-        data = CategoryParser.parse_args()
-        category = Category(**data).create()
-        return responses.SuccessResponse(marshal(category, CategorySchema)).send()
+        try:
+            data = CategoryParser.parse_args()
+            category = Category(**data).create()
+            return responses.SuccessResponse(marshal(category, CategorySchema)).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()

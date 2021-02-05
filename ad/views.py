@@ -30,11 +30,14 @@ class AdListApi(Resource):
 
         :return:
         """
-        arg = dict(request.args)
-        index, size = handle_pagination(arg)
-        ads = Ad.query.filter_by(is_deleted=False).all()
-        total = len(ads)
-        return responses.SuccessResponse(marshal_list(ads[index:size], AdSchema), index=index, total=total).send()
+        try:
+            arg = dict(request.args)
+            index, size = handle_pagination(arg)
+            ads = Ad.query.filter_by(is_deleted=False).all()
+            total = len(ads)
+            return responses.SuccessResponse(marshal_list(ads[index:size], AdSchema), index=index, total=total).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
 
 @ad.route("/")
@@ -58,20 +61,21 @@ class AdCreateApi(Resource):
 
         :return:
         """
-        data = AdParser.parse_args()
-        data['category'] = Category.query.get(data['category']['id'])
-        if not data['category']:
-            raise CustomException(detail='Category does not exist.')
-        media = None
-        if data.get('media'):
+        try:
+            data = AdParser.parse_args()
+            data['category'] = Category.query.get(data['category']['id'])
+            if not data['category']:
+                raise CustomException(detail='Category does not exist.')
             media = data.pop('media')
-        data['user'] = g.user
-        ad = Ad(**data).create()
-        if media:
-            for item in media:
-                ad.media_set.append(Media(path=item['path']))
-        ad.save()
-        return responses.SuccessResponse(marshal(ad, AdSchema)).send()
+            data['user'] = g.user
+            ad_item = Ad(**data).create()
+            if media:
+                for item in media:
+                    ad_item.media_set.append(Media(path=item['path']))
+            ad_item.save()
+            return responses.SuccessResponse(marshal(ad_item, AdSchema)).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
 
 @ad.route("/<id>")
@@ -84,10 +88,13 @@ class AdApi(Resource):
         :param id:
         :return:
         """
-        ad = Ad.query.get(id)
-        if ad is None or ad.is_deleted:
-            raise CustomException(detail='Ad does not exist.')
-        return responses.SuccessResponse(marshal(ad, AdSchema)).send()
+        try:
+            ad_item = Ad.query.get(id)
+            if ad_item is None or ad_item.is_deleted:
+                raise CustomException(detail='Ad does not exist.')
+            return responses.SuccessResponse(marshal(ad_item, AdSchema)).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
     @auth_required
     @ad.expect(AdSchema)
@@ -106,34 +113,18 @@ class AdApi(Resource):
         :param id:
         :return:
         """
-        data = AdParser.parse_args()
-        import pdb;pdb.set_trace()
-        ad = Ad.query.get(id)
-        if ad is None or ad.is_deleted:
-            raise CustomException(detail='Ad does not exist.')
+        try:
+            data = AdParser.parse_args()
+            ad_item = Ad.query.get(id)
+            if ad_item is None or ad_item.is_deleted:
+                raise CustomException(detail='Ad does not exist.')
 
-        if ad.user != g.user:
-            raise CustomException(detail='No permission.', code=403)
+            ad_item.has_permission()
 
-        if data.get('category', None) and ad.category.id != data['category']['id']:
-            category = Category.query.get(data['category']['id'])
-            if category:
-                ad.category = category
-            else:
-                raise CustomException(detail='Category does not exist.')
-
-        if data.get('title', None) and ad.title != data['title']:
-            ad.title = data['title']
-
-        if data.get('body', None) and ad.body != data['body']:
-            ad.body = data['body']
-
-        if data.get('media'):
-            for media_data in data['media']:
-                if media_data.get('id', None) is None:
-                    ad.media_set.append(Media(path=media_data['path']))
-        ad.save()
-        return responses.SuccessResponse(marshal(ad, AdSchema)).send()
+            ad_item.update(data)
+            return responses.SuccessResponse(marshal(ad_item, AdSchema)).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
     @auth_required
     def delete(self, id):
@@ -145,12 +136,13 @@ class AdApi(Resource):
         :param id:
         :return:
         """
-        ad = Ad.query.get(id)
-        if ad is None or ad.is_deleted:
-            raise CustomException(detail='Ad does not exist.')
+        try:
+            ad_item = Ad.query.get(id)
+            if ad_item is None or ad_item.is_deleted:
+                raise CustomException(detail='Ad does not exist.')
 
-        if ad.user != g.user:
-            raise CustomException(detail='No permission.', code=403)
-        ad.is_deleted = True
-        ad.save()
-        return responses.SuccessResponse(status=204).send()
+            ad_item.has_permission()
+            ad_item.delete()
+            return responses.SuccessResponse(status=204).send()
+        except CustomException as e:
+            return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
