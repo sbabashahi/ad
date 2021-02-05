@@ -1,3 +1,4 @@
+import os
 from flask import Flask, Blueprint
 
 from rest import api
@@ -17,10 +18,9 @@ api.add_namespace(category_name_space)
 api.add_namespace(ad_name_space)
 app.register_blueprint(blueprint)
 # get env variable
-app.config['BUNDLE_ERRORS'] = True
-app.config['SECRET_KEY'] = 'set a key and get it from env'
+app.config['BUNDLE_ERRORS'] = False
 db = initialize_db(app)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=os.getenv('PORT'))
