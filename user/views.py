@@ -31,7 +31,7 @@ class UserRegisterApi(Resource):
         """
         try:
             data = LoginRegisterParser.parse_args()
-            user = User.query.filter_by(username=data['username']).first()
+            user = User.query.get(username=data['username'])
             if user is None:
                 user = User(username=data['username'])
                 user.set_password(data['password'])
@@ -64,7 +64,7 @@ class UserLoginApi(Resource):
         """
         try:
             data = LoginRegisterParser.parse_args()
-            user = User.query.filter_by(username=data['username']).first()
+            user = User.query.get(username=data['username'])
             if user is None:
                 raise CustomException(detail='User does not exist.')
             else:
@@ -74,7 +74,7 @@ class UserLoginApi(Resource):
                     }
                     return responses.SuccessResponse(data).send()
                 else:
-                    raise CustomException(detail='User does not exist.')
+                    raise CustomException(detail='username or password is incorrect.')
         except CustomException as e:
             return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 

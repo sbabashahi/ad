@@ -37,6 +37,16 @@ AdSchema = api.model('Ad', {
 })
 
 
+AdListSchema = api.model('Ad', {
+    'id': fields.String(readonly=True),
+    'title': fields.String(required=True, description='Title of Ad'),
+    'created': fields.Integer(readonly=True, description='Ad create  epoch time'),
+    'category': fields.Nested(CategorySchema),
+    'media': fields.List(fields.Nested(MediaSchema), required=True, description='Ad Media list',
+                         attribute='media_set'),
+})
+
+
 AdParser = reqparse.RequestParser()
 AdParser.add_argument('title', type=parser_utils.validate_string(100, 3), required=True, location='json')
 AdParser.add_argument('body', type=parser_utils.validate_string(5000, 3), required=True,  location='json')
