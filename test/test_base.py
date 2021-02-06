@@ -3,7 +3,6 @@ import os
 
 from init_test_db import init_db
 from app import app
-from setting.database import db
 
 
 class BaseTestCase(unittest.TestCase):
@@ -20,7 +19,3 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.app = app.test_client()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()

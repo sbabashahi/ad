@@ -2,23 +2,33 @@ import json
 from test.test_base import BaseTestCase
 
 
-class MyTest(BaseTestCase):
+class UserTest(BaseTestCase):
+
+    def test_register_with_wrong_data(self):
+        data = {
+            'username': 'saee',
+            'password': '12345',
+        }
+        resp = self.app.post('user/register', json=data)
+        data = json.loads(resp.data.decode())
+        self.assertEqual(resp.status_code, 400, 'Wrong response code.')
+        self.assertEqual(data['errors']['username'], 'Min length is 5', 'Wrong response format.')
 
     def test_register(self):
         data = {
             'username': 'saeed',
-            'password': '12345'
+            'password': '12345',
         }
         resp = self.app.post('user/register', json=data)
         data = json.loads(resp.data.decode())
-        self.assertEqual(resp.status_code, 200, 'Wrong response code.')
+        self.assertEqual(resp.status_code, 201, 'Wrong response code.')
         self.assertIsInstance(data['data'], dict, 'Wrong response format.')
         self.assertEqual(data['success'], True, 'Wrong response format.')
 
     def test_register_again(self):
         data = {
             'username': 'saeed',
-            'password': '12345'
+            'password': '12345',
         }
         resp = self.app.post('user/register', json=data)
         data = json.loads(resp.data.decode())
@@ -29,7 +39,7 @@ class MyTest(BaseTestCase):
     def test_register_login(self):
         data = {
             'username': 'saeed',
-            'password': '12345'
+            'password': '12345',
         }
         resp = self.app.post('user/login', json=data)
         data = json.loads(resp.data.decode())

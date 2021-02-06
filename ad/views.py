@@ -14,8 +14,8 @@ from utils.exceptions import CustomException
 ad = api.namespace('ad', description='Ad Api')
 
 
-@ad.route("/list")
-class AdListApi(Resource):
+@ad.route("/")
+class AdApi(Resource):
 
     @ad.doc(model=AdSchema)
     def get(self):
@@ -38,10 +38,6 @@ class AdListApi(Resource):
             return responses.SuccessResponse(marshal_list(ads[index:size], AdSchema), index=index, total=total).send()
         except CustomException as e:
             return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
-
-
-@ad.route("/")
-class AdCreateApi(Resource):
 
     @auth_required
     @ad.doc(model=AdSchema)
@@ -73,13 +69,13 @@ class AdCreateApi(Resource):
                 for item in media:
                     ad_item.media_set.append(Media(path=item['path']))
             ad_item.save()
-            return responses.SuccessResponse(marshal(ad_item, AdSchema)).send()
+            return responses.SuccessResponse(marshal(ad_item, AdSchema), status=201).send()
         except CustomException as e:
             return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
 
 @ad.route("/<id>")
-class AdApi(Resource):
+class AdRUDApi(Resource):
 
     @ad.doc(model=AdSchema)
     def get(self, id):
@@ -120,7 +116,6 @@ class AdApi(Resource):
                 raise CustomException(detail='Ad does not exist.')
 
             ad_item.has_permission()
-
             ad_item.update(data)
             return responses.SuccessResponse(marshal(ad_item, AdSchema)).send()
         except CustomException as e:
@@ -140,7 +135,6 @@ class AdApi(Resource):
             ad_item = Ad.query.get(id)
             if ad_item is None or ad_item.is_deleted:
                 raise CustomException(detail='Ad does not exist.')
-
             ad_item.has_permission()
             ad_item.delete()
             return responses.SuccessResponse(status=204).send()

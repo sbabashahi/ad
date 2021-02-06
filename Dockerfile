@@ -11,7 +11,6 @@ WORKDIR /usr/src/app/
 EXPOSE 5000
 
 RUN pip install -r requirements.txt
-RUN touch test.db
+RUN python init_db.py
 
-CMD ["python", "init_db.py"]
 CMD ["python", "app.py"]

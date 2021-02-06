@@ -3,18 +3,18 @@ from flask_restx import Resource, marshal
 
 
 from rest import api
-from utils.middleware import auth_required
 from category.models import Category
 from category.schema import CategorySchema, CategoryParser
 from utils import responses
 from utils.exceptions import CustomException
+from utils.middleware import auth_required
 from utils.utils import handle_pagination, marshal_list
 
 
 ca = api.namespace('category', description='Category Api')
 
 
-@ca.route("/list")
+@ca.route("/")
 class CategoryListApi(Resource):
 
     @ca.doc(model=CategorySchema)
@@ -36,10 +36,6 @@ class CategoryListApi(Resource):
         except CustomException as e:
             return responses.ErrorResponse(message=e.detail, status=e.status_code).send()
 
-
-@ca.route("/")
-class CategoryCreateApi(Resource):
-
     @auth_required
     @ca.doc(model=CategorySchema)
     @ca.expect(CategoryParser)
@@ -55,6 +51,6 @@ class CategoryCreateApi(Resource):
         try:
             data = CategoryParser.parse_args()
             category = Category(**data).create()
-            return responses.SuccessResponse(marshal(category, CategorySchema)).send()
+            return responses.SuccessResponse(marshal(category, CategorySchema), status=201).send()
         except CustomException as e:
             return responses.ErrorResponse(message=e.detail, status=e.status_code).send()

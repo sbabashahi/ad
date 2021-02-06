@@ -1,10 +1,11 @@
-**A rest service with flask, sqlalchemy, sqllite**
+**A rest service with flask, sqlite, sqlalchemy**
 
 To authorize use in header add Authentication: JWT your-jwt-token
     
-    get your token from login or register 
+    Get your token from login or register 
 
 
 **Test**
     
     Just run nose2
+    We have some integration test

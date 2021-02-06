@@ -1,7 +1,8 @@
 import datetime
 from hashlib import md5
-
 import jwt
+
+from ad.models import Ad
 from setting.database import db
 from utils.model import BaseModel
 from utils.utils import create_jwt_secret
@@ -42,3 +43,6 @@ class User(BaseModel):
             )
         except Exception as e:
             return e
+
+    def my_ads(self):
+        return Ad.query.filter_by(user=self, is_deleted=False).all()

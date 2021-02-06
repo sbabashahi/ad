@@ -21,7 +21,7 @@ def auth_required(f):
 def handle_jwt_decode(req):
     auth = req.headers.get('Authorization', None)
     if auth is None or auth == '':
-        raise exceptions.CustomException(detail='You have no Authorization')
+        raise exceptions.CustomException(detail='You have no Authorization', code=403)
     if auth.startswith('JWT '):
         token = auth.split()
         if len(token) == 1:
@@ -31,15 +31,15 @@ def handle_jwt_decode(req):
         try:
             user_id = jwt.decode(token[1], options={"verify_signature": False})['sub']
         except jwt.exceptions.PyJWTError as e:
-            raise exceptions.CustomException(detail='Token not verified.')
+            raise exceptions.CustomException(detail='Token not verified.', code=403)
         user = User.query.get(user_id)
         if user:
             try:
                 jwt.decode(token[1], user.secret, algorithms='HS256')
             except jwt.exceptions.PyJWKError as e:
-                raise exceptions.CustomException(detail='Token not verified.')
+                raise exceptions.CustomException(detail='Token not verified.', code=403)
             return user
         else:
-            raise exceptions.CustomException(detail='Invalid token.')
+            raise exceptions.CustomException(detail='Invalid token.', code=403)
     else:
         raise exceptions.CustomException(detail='Invalid Authorization header.')
