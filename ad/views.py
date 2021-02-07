@@ -21,13 +21,13 @@ class AdApi(Resource):
         """
         List of Ads
 
-        with pagination index default 0, size default 20
+            with pagination index default 0, size default 20
 
-        use search param query on title and body
+            use search param query on title and body
 
-        use category id of category filter on that category
+            use category id of category filter on that category
 
-        /?search=title&category=1
+            /?search=title&category=1
 
         :return:
         """
@@ -60,7 +60,6 @@ class AdApi(Resource):
 
             media  [{'path': 'path of media'}] max 5
 
-
         :return:
         """
         try:
@@ -87,6 +86,7 @@ class AdRUDApi(Resource):
     def get(self, id):
         """
         Get ad details by id
+
         :param id:
         :return:
         """
@@ -130,9 +130,9 @@ class AdRUDApi(Resource):
     @auth_required
     def delete(self, id):
         """
-        Delete project
+        Delete ad
 
-        Soft delete
+            Soft delete
 
         :param id:
         :return:

@@ -22,7 +22,7 @@ class CategoryListApi(Resource):
         """
         List of categories
 
-        with pagination index default 0, size default 20
+            with pagination index default 0, size default 20
 
         :return:
         """

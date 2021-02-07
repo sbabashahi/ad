@@ -13,9 +13,9 @@ app = Flask(__name__)
 
 blueprint = Blueprint('api', __name__, url_prefix='/')
 api.init_app(blueprint)
-api.add_namespace(user_name_space)
-api.add_namespace(category_name_space)
 api.add_namespace(ad_name_space)
+api.add_namespace(category_name_space)
+api.add_namespace(user_name_space)
 app.register_blueprint(blueprint)
 # get env variable
 app.config['BUNDLE_ERRORS'] = False
